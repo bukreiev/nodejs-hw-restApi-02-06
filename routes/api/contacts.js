@@ -12,21 +12,21 @@ router.get('/', ctrl.getAll);
 
 router.get('/:contactId', validationId, ctrl.getContactById);
 
-router.post('/', validation(schemas.addSchema), ctrl.addContact);
+router.post('/', validateBody(schemas.addSchema), ctrl.addContact);
 
 router.delete('/:contactId', validationId, ctrl.deleteContactByID);
 
 router.put(
   '/:contactId',
   validationId,
-  validation(schemas.addSchema),
+  validateBody(schemas.addSchema),
   ctrl.updateContact
 );
 
 router.patch(
   '/:contactId/favorite',
   validationId,
-  validateBody(schemas.updateFavoriteSchema),
+  validation(schemas.updateFavoriteSchema),
   ctrl.updateStatusContact
 );
 
