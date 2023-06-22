@@ -26,7 +26,7 @@ const deleteContactByID = async (req, res) => {
   if (!result) {
     throw httpError(404, 'Not Found');
   }
-  res.status(200).json({ message: 'contact deleted' });
+  res.status(204).json({ message: 'Contact deleted' });
 };
 
 const updateContact = async (req, res) => {
