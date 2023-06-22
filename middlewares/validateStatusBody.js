@@ -10,7 +10,8 @@ const validateStatusBody = schema => {
       ) {
         next(httpError(400, `missing field favorite`));
       } else if (typeof req.body.favorite !== 'boolean') {
-        next(httpError(400, `field favorite has mistakes`));
+        next(httpError(404, `field favorite has mistakes`));
+        console.log(`field favorite has mistakes`);
       }
     }
     next();
