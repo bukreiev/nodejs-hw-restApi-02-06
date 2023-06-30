@@ -12,6 +12,8 @@ const addSchema = Joi.object({
 const updateFavoriteSchema = Joi.object({
   favorite: Joi.boolean().required(),
 });
+// eslint-disable-next-line no-useless-escape
+// const emailRegexp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
 const contactSchema = new Schema(
   {
@@ -21,17 +23,29 @@ const contactSchema = new Schema(
     },
     email: {
       type: String,
+      // match: emailRegexp,
+      // unique: true,
+      required: true,
     },
     phone: {
       type: String,
+      // unique: true,
+      required: true,
     },
     favorite: {
       type: Boolean,
       default: false,
+      required: true,
+    },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
+      required: true,
     },
   },
   {
     versionKey: false,
+    timestamps: true,
   }
 );
 
