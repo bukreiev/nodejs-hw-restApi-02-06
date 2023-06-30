@@ -7,7 +7,7 @@ const { httpError } = require('../helpers');
 const authenticate = async (req, _, next) => {
   const { authorization = '' } = req.headers;
   const [bearer, token] = authorization.split(' ');
-  if (bearer !== 'Bearer') {
+  if (bearer !== 'Bearer' || !token) {
     next(httpError(401));
   }
   try {
