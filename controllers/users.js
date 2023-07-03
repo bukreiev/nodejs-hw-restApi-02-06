@@ -1,10 +1,16 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const gravatar = require('gravatar');
+const path = require('path');
+const fs = require('fs/promises');
+const Jimp = require('jimp');
+
 const { User } = require('../models/user');
 
 const { ctrlWrapper, httpError } = require('../helpers');
 const { SECRET_KEY } = process.env;
-
+const avatarsDir = path.join(__dirname, '../', 'public', 'avatars');
+// register
 const register = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
@@ -14,7 +20,13 @@ const register = async (req, res) => {
   }
 
   const hashPassword = await bcrypt.hash(password, 10);
-  const newUser = await User.create({ ...req.body, password: hashPassword });
+  const avatarURL = gravatar.url(email);
+
+  const newUser = await User.create({
+    ...req.body,
+    password: hashPassword,
+    avatarURL,
+  });
 
   res.status(201).json({
     email: newUser.email,
@@ -22,10 +34,10 @@ const register = async (req, res) => {
   });
 };
 
+// login
 const login = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
-  console.log(user);
   if (!user) {
     throw httpError(401, 'Email or password is wrong');
   }
@@ -50,6 +62,26 @@ const login = async (req, res) => {
   });
 };
 
+// updateAvatar
+const updateAvatar = async (req, res) => {
+  const { _id } = req.user;
+  const { path: tempUpload, originalname } = req.file;
+  const resizeAvatar = await Jimp.read(tempUpload);
+  resizeAvatar.resize(250, 250).write(tempUpload);
+
+  const fileName = `${_id}_${originalname}`;
+  const resultUpload = path.join(avatarsDir, fileName);
+  await fs.rename(tempUpload, resultUpload);
+
+  const avatarURL = path.join('avatars', fileName);
+  await User.findByIdAndUpdate(_id, { avatarURL });
+
+  res.json({
+    avatarURL,
+  });
+};
+
+// current
 const getCurrent = async (req, res) => {
   const { email, subscription } = req.user;
 
@@ -59,6 +91,7 @@ const getCurrent = async (req, res) => {
   });
 };
 
+// logout
 const logout = async (req, res) => {
   const { _id } = req.user;
   await User.findByIdAndDelete(_id, { token: '' });
@@ -71,6 +104,7 @@ const logout = async (req, res) => {
 module.exports = {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
+  updateAvatar: ctrlWrapper(updateAvatar),
   getCurrent: ctrlWrapper(getCurrent),
   logout: ctrlWrapper(logout),
 };
